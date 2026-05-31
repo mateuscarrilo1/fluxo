@@ -582,8 +582,8 @@ auth.onAuthStateChanged(user=>{
     const av=document.getElementById('userAvatar');
     if(user.photoURL){ av.style.backgroundImage=`url(${user.photoURL})`; av.style.backgroundSize='cover'; av.textContent=''; }
     else { av.textContent=(user.displayName||'U')[0].toUpperCase(); }
+    initCharts();
     listenData();
-    setTimeout(initCharts,200);
   } else {
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('appScreen').style.display='none';
@@ -596,18 +596,32 @@ auth.onAuthStateChanged(user=>{
 // FIRESTORE LISTENERS
 // ══════════════════════════════════════════
 function listenData(){
-  function sub(name, arr, cb){
-    return col(name).onSnapshot(snap=>{
-      window[arr]=snap.docs.map(d=>({id:d.id,...d.data()}));
-      cb();
-    });
-  }
-  unsubArr.push(sub('transacoes','txs',renderAll));
-  unsubArr.push(sub('metas','metas',renderMetas));
-  unsubArr.push(sub('investimentos','invs',()=>{renderInvs();updateCharts();}));
-  unsubArr.push(sub('agendamentos','agendamentos',()=>{renderCalendar();renderAgendaBanner();}));
-  unsubArr.push(sub('recorrentes','recorrentes',renderRecorrentes));
-  unsubArr.push(sub('compras','compras',renderCompras));
+  unsubArr.push(col('transacoes').onSnapshot(snap=>{
+    txs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAll();
+  }));
+  unsubArr.push(col('metas').onSnapshot(snap=>{
+    metas=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMetas();
+  }));
+  unsubArr.push(col('investimentos').onSnapshot(snap=>{
+    invs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderInvs();
+    updateCharts();
+  }));
+  unsubArr.push(col('agendamentos').onSnapshot(snap=>{
+    agendamentos=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderCalendar();
+    renderAgendaBanner();
+  }));
+  unsubArr.push(col('recorrentes').onSnapshot(snap=>{
+    recorrentes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderRecorrentes();
+  }));
+  unsubArr.push(col('compras').onSnapshot(snap=>{
+    compras=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderCompras();
+  }));
 }
 
 // ══════════════════════════════════════════
